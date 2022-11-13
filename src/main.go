@@ -154,6 +154,26 @@ func main() {
 			_, err := RemoteRun(getIpByName(container.Runner), fmt.Sprintf("sudo nerdctl rm %s -f", container.Name))
 			checkError(err, "Failed to delete container", 1)
 			fmt.Printf("Container %s deleted", container.Name)
+		case "exec":
+			if len(args) < 3 {
+				fmt.Println("No container name provided")
+				os.Exit(1)
+			}
+			if !checkIfContainerExists(args[2]) {
+				fmt.Println("Container does not exist")
+				os.Exit(1)
+			}
+			if len(args) < 4 {
+				fmt.Println("No command provided")
+				os.Exit(1)
+			}
+			container := getContainerByName(args[2])
+			fmt.Println("Note: Commands which require user input are not supported")
+			fmt.Printf("Connecting to %s...\n", container.Name)
+			stdout, err := RemoteRun(getIpByName(container.Runner), fmt.Sprintf("sudo nerdctl exec %s %s", container.Name, strings.Join(args[3:], " ")))
+			checkError(err, "Failed to connect to container", 1)
+			fmt.Print(stdout)
+			fmt.Println("Disconnected from container")
 		}
 	}
 }
@@ -224,6 +244,7 @@ func showHelp() {
 	fmt.Println("  container create <runner-name> <container-name> <image>             - Create a new container")
 	fmt.Println("  container create <runner-name> <container-name> <image> <port:port> - Create a new container with port mapping")
 	fmt.Println("  container delete <name>                                             - Delete a container")
+	fmt.Println("  container exec <name> <command>                                     - Execute a command in a container (Non-interactive)")
 	fmt.Println("  help                                                                - Show this help message")
 }
 

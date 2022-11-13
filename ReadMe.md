@@ -2,8 +2,6 @@
 
 ![pipeline status](https://github.com/hContainers/hContainers/actions/workflows/CI.yml/badge.svg?branch=main)
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev/)
-![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
-[![Open Source? Yes!](https://badgen.net/badge/Open%20Source/Yes%21/blue?icon=github)](https://github.com/Naereen/badges/)
 
 hContainers is a tool to help you manage your Docker containers at the hetzner cloud in a simple way without the need of managing the vm's yourself.
 

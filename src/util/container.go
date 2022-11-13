@@ -13,14 +13,21 @@ func GetAllContainers() []Container {
 	for _, server := range GetAllServers() {
 		var stdout string
 		var err error
-		stdout, err = RemoteRun(server.PublicNet.IPv4.IP.String(), "sudo nerdctl container ls --format '{{.Names}} {{.ID}} {{.Image}}'")
+		stdout, err = RemoteRun(server.PublicNet.IPv4.IP.String(), "sudo nerdctl container ls --all --format '{{.Names}} {{.ID}} {{.Image}}'")
 		if err != nil {
 			fmt.Println("An error occured while getting containers")
 		}
 		for _, container := range strings.Split(stdout, "\n") {
 			if strings.TrimSpace(container) != "" {
 				elements := strings.Split(container, " ")
-				containers = append(containers, Container{Name: elements[0], ID: elements[1], Image: elements[2], Runner: server.Name})
+				containers = append(containers,
+					Container{
+						Name:    elements[0],
+						ID:      elements[1],
+						Image:   strings.Replace(strings.Split(elements[2], ":")[0], "docker.io/library/", "", 1),
+						Version: strings.Split(elements[2], ":")[1],
+						Runner:  server.Name,
+					})
 			}
 		}
 	}

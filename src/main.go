@@ -101,7 +101,7 @@ func main() {
 			containers := GetAllContainers()
 			fmt.Printf("Available containers (Amount: %d):\n", len(containers))
 			for _, container := range containers {
-				fmt.Printf("- %s\n", container.Name)
+				fmt.Printf("- %s (%s:%s)\n", container.Name, container.Image, container.Version)
 			}
 		case "create":
 			if len(args) < 3 {
@@ -172,6 +172,48 @@ func main() {
 			CheckError(err, "Failed to connect to container", 1)
 			fmt.Print(stdout)
 			fmt.Println("Disconnected from container")
+		case "stop":
+			if len(args) < 3 {
+				fmt.Println("No container name provided")
+				os.Exit(1)
+			}
+			if !CheckIfContainerExists(args[2]) {
+				fmt.Println("Container does not exist")
+				os.Exit(1)
+			}
+			container := GetContainerByName(args[2])
+			fmt.Println("Stopping container...")
+			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl stop %s", container.Name))
+			CheckError(err, "Failed to stop container", 1)
+			fmt.Printf("Container %s stopped\n", container.Name)
+		case "start":
+			if len(args) < 3 {
+				fmt.Println("No container name provided")
+				os.Exit(1)
+			}
+			if !CheckIfContainerExists(args[2]) {
+				fmt.Println("Container does not exist")
+				os.Exit(1)
+			}
+			container := GetContainerByName(args[2])
+			fmt.Println("Starting container...")
+			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl restart %s", container.Name))
+			CheckError(err, "Failed to start container", 1)
+			fmt.Printf("Container %s started\n", container.Name)
+		case "restart":
+			if len(args) < 3 {
+				fmt.Println("No container name provided")
+				os.Exit(1)
+			}
+			if !CheckIfContainerExists(args[2]) {
+				fmt.Println("Container does not exist")
+				os.Exit(1)
+			}
+			container := GetContainerByName(args[2])
+			fmt.Println("Restarting container...")
+			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl restart %s", container.Name))
+			CheckError(err, "Failed to restart container", 1)
+			fmt.Printf("Container %s restarted\n", container.Name)
 		}
 	}
 }

@@ -39,6 +39,13 @@ export HCLOUD_TOKEN="your-token"
 export HCONTAINERS_SSH_KEY_PATH="~/.ssh/id_ed25519"
 ```
 
+# Features
+
+- Create/Delete/List runners
+- Create/Delete/List containers
+- Start/Stop/Restart containers
+- Execute commands in containers
+
 # Concept
 
 The base of hContainers are runners. This are vms which get managed by hContainers. The only thing you need to think about is how many containers should run on a runner and how much memory and cpu the runner should get. The rest is managed by hContainers.

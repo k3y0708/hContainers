@@ -24,6 +24,6 @@ compile_mac_64:
 
 compile_all: compile_windows_32 compile_windows_64 compile_linux_32 compile_linux_64 compile_mac_64
 
-clear:
-	@echo "Clearing..."
+clean:
+	@echo "Cleaning..."
 	@rm -rf dist

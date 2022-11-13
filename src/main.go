@@ -106,7 +106,40 @@ func main() {
 				fmt.Printf("- %s\n", container.Name)
 			}
 		case "create":
-			//TODO: Implement
+			if len(args) < 3 {
+				fmt.Println("No runner name provided")
+				os.Exit(1)
+			}
+			if !checkIfServerExists(args[2]) {
+				fmt.Println("Runner does not exist")
+				os.Exit(1)
+			}
+			if len(args) < 4 {
+				fmt.Println("No container name provided")
+				os.Exit(1)
+			}
+			if !checkIfContainerNameIsValid(args[3]) {
+				fmt.Println("Invalid container name")
+				os.Exit(1)
+			}
+			if checkIfContainerExists(args[3]) {
+				fmt.Println("Container already exists")
+				os.Exit(1)
+			}
+			if len(args) < 5 {
+				fmt.Println("No image name provided")
+				os.Exit(1)
+			}
+			fmt.Println("Creating container...")
+			if len(args) < 6 {
+				_, err := RemoteRun(getIpByName(args[2]), fmt.Sprintf("sudo nerdctl run -d --name %s %s", args[3], args[4]))
+				checkError(err, "Failed to create container", 1)
+				fmt.Println("Container created")
+			} else {
+				_, err := RemoteRun(getIpByName(args[2]), fmt.Sprintf("sudo nerdctl run -d -p %s --name %s %s", args[5], args[3], args[4]))
+				checkError(err, "Failed to create container", 1)
+				fmt.Printf("Container created (with port mapping %s)\n", args[5])
+			}
 		case "delete":
 			if len(args) < 3 {
 				fmt.Println("No container name provided")
@@ -184,12 +217,14 @@ func checkIfContainerNameIsValid(containerName string) bool {
 func showHelp() {
 	fmt.Println("Usage: hContainers <command> [arguments]")
 	fmt.Println("Commands:")
-	fmt.Println("  runner list                 - List all available runners")
-	fmt.Println("  runner create <runner-name> - Create a new runner")
-	fmt.Println("  runner delete <runner-name> - Delete a runner")
-	fmt.Println("  container list              - List all available containers")
-	fmt.Println("  container delete <name>     - Delete a container")
-	fmt.Println("  help                        - Show this help message")
+	fmt.Println("  runner list                                                         - List all available runners")
+	fmt.Println("  runner create <runner-name>                                         - Create a new runner")
+	fmt.Println("  runner delete <runner-name>                                         - Delete a runner")
+	fmt.Println("  container list                                                      - List all available containers")
+	fmt.Println("  container create <runner-name> <container-name> <image>             - Create a new container")
+	fmt.Println("  container create <runner-name> <container-name> <image> <port:port> - Create a new container with port mapping")
+	fmt.Println("  container delete <name>                                             - Delete a container")
+	fmt.Println("  help                                                                - Show this help message")
 }
 
 func getAmountOfRunners() int {

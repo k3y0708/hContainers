@@ -1,4 +1,4 @@
-# hContainers
+# hContainers ⚓
 
 ![pipeline status](https://github.com/hContainers/hContainers/actions/workflows/CI.yml/badge.svg?branch=main)
 [![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev/)

@@ -1,7 +1,5 @@
 # Development
 
-[TOC]
-
 ## Requirements
 
 - [GoLang](https://golang.org/)

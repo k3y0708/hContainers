@@ -1,18 +1,17 @@
-package main
+package util
 
 import (
 	"bytes"
+	"k3y0708/hContainers/global"
 	"net"
 
 	"golang.org/x/crypto/ssh"
 )
 
-var privateKey string
-
 func RemoteRun(addr string, cmd string) (string, error) {
 	// privateKey could be read from a file, or retrieved from another storage
 	// source, such as the Secret Service / GNOME Keyring
-	key, err := ssh.ParsePrivateKey([]byte(privateKey))
+	key, err := ssh.ParsePrivateKey([]byte(global.PrivateKey))
 	if err != nil {
 		return "", err
 	}

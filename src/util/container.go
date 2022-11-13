@@ -1,0 +1,52 @@
+package util
+
+import (
+	"fmt"
+	"regexp"
+	"strings"
+
+	. "k3y0708/hContainers/types"
+)
+
+func GetAllContainers() []Container {
+	var containers []Container
+	for _, server := range GetAllServers() {
+		var stdout string
+		var err error
+		stdout, err = RemoteRun(server.PublicNet.IPv4.IP.String(), "sudo nerdctl container ls --format '{{.Names}} {{.ID}} {{.Image}}'")
+		if err != nil {
+			fmt.Println("An error occured while getting containers")
+		}
+		for _, container := range strings.Split(stdout, "\n") {
+			if strings.TrimSpace(container) != "" {
+				elements := strings.Split(container, " ")
+				containers = append(containers, Container{Name: elements[0], ID: elements[1], Image: elements[2], Runner: server.Name})
+			}
+		}
+	}
+	return containers
+}
+
+func CheckIfContainerExists(containerName string) bool {
+	containers := GetAllContainers()
+	for _, container := range containers {
+		if container.Name == containerName {
+			return true
+		}
+	}
+	return false
+}
+
+func GetContainerByName(containerName string) Container {
+	containers := GetAllContainers()
+	for _, container := range containers {
+		if container.Name == containerName {
+			return container
+		}
+	}
+	return Container{}
+}
+
+func CheckIfContainerNameIsValid(containerName string) bool {
+	return regexp.MustCompile(`^[A-Za-z0-9]+(?:[._-](?:[A-Za-z0-9]+))*$`).MatchString(containerName)
+}

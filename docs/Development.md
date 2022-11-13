@@ -5,8 +5,6 @@
 - [GoLang](https://golang.org/)
 - [Make](https://www.gnu.org/software/make/)
 
-## 
-
 ## Run for development
 
 To run the project as is you need to run `go run .` in the src folder.

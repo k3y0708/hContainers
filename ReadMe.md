@@ -1,5 +1,10 @@
 # hContainers
 
+![pipeline status](https://github.com/hContainers/hContainers/actions/workflows/CI.yml/badge.svg?branch=main)
+[![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev/)
+![Terminal](https://badgen.net/badge/icon/terminal?icon=terminal&label)
+[![Open Source? Yes!](https://badgen.net/badge/Open%20Source/Yes%21/blue?icon=github)](https://github.com/Naereen/badges/)
+
 hContainers is a tool to help you manage your Docker containers at the hetzner cloud in a simple way without the need of managing the vm's yourself.
 
 # Setup and Installation
@@ -41,3 +46,9 @@ export HCONTAINERS_SSH_KEY_PATH="~/.ssh/id_ed25519"
 The base of hContainers are runners. This are vms which get managed by hContainers. The only thing you need to think about is how many containers should run on a runner and how much memory and cpu the runner should get. The rest is managed by hContainers.
 
 _More follows_
+
+# Tools used by hContainers
+
+- [Hetzner Cloud API](https://docs.hetzner.cloud/)
+- [Containerd](https://containerd.io/)
+- [NerdCtl](https://github.com/containerd/nerdctl)

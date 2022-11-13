@@ -1,0 +1,21 @@
+# Compiled files and binaries
+dist/**/*
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Local Notes
+**/Notes
+**/Notes.*
+
+# IDEs
+.vscode/*
+!.vscode/extensions.json
+
+# OS generated files
+.DS_Store

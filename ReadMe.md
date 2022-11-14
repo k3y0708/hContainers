@@ -47,6 +47,7 @@ export HCONTAINERS_SSH_KEY_PATH="~/.ssh/id_ed25519"
 - Start/Stop/Restart containers
 - Pause/Unpause containers
 - Execute commands in containers
+- Get logs from containers (not working correctly yet)
 
 # Concept
 

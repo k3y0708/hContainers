@@ -299,6 +299,21 @@ func main() {
 			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl unpause %s", container.Name))
 			CheckError(err, "Failed to unpause container", 1)
 			fmt.Printf("Container %s unpaused\n", container.Name)
+		case "logs":
+			if len(args) < 3 {
+				fmt.Println("No container name provided")
+				os.Exit(1)
+			}
+			if !CheckIfContainerExists(args[2]) {
+				fmt.Println("Container does not exist")
+				os.Exit(1)
+			}
+			container := GetContainerByName(args[2])
+			fmt.Println("Getting logs...")
+			stdout, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl logs %s", container.Name))
+			CheckError(err, "Failed to get logs", 1)
+			fmt.Print(stdout)
+			fmt.Println("Disconnected from container")
 		}
 	}
 }

@@ -42,8 +42,10 @@ export HCONTAINERS_SSH_KEY_PATH="~/.ssh/id_ed25519"
 # Features
 
 - Create/Delete/List runners
+- Restart runners (only restart if absolutely necessary)
 - Create/Delete/List containers
 - Start/Stop/Restart containers
+- Pause/Unpause containers
 - Execute commands in containers
 
 # Concept

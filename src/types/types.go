@@ -6,4 +6,5 @@ type Container struct {
 	Image   string
 	Version string
 	Runner  string
+	Status  string
 }

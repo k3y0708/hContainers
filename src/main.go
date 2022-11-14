@@ -7,7 +7,9 @@ import (
 	"os"
 	"strings"
 
+	"k3y0708/hContainers/colors"
 	"k3y0708/hContainers/global"
+	. "k3y0708/hContainers/types"
 	. "k3y0708/hContainers/util"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
@@ -94,14 +96,69 @@ func main() {
 			_, _, err := global.Client.Server.DeleteWithResult(context.Background(), GetServerByName(args[2]))
 			CheckError(err, "Failed to delete runner", 1)
 			fmt.Println("Runner deleted")
+		case "restart":
+			if len(args) < 3 {
+				fmt.Println("No runner name provided")
+				os.Exit(1)
+			}
+			if !CheckIfServerExists(args[2]) {
+				fmt.Println("Runner does not exist")
+				os.Exit(1)
+			}
+			fmt.Println("Restarting runner...")
+			_, _, err := global.Client.Server.Reboot(context.Background(), GetServerByName(args[2]))
+			CheckError(err, "Failed to restart runner", 1)
+			fmt.Println("Runner restarted")
 		}
 	case "container":
 		switch args[1] {
 		case "list":
 			containers := GetAllContainers()
 			fmt.Printf("Available containers (Amount: %d):\n", len(containers))
+			var runningContainers, pausedContainers, exitedContainers, createdContainers, unknownContainers []Container
 			for _, container := range containers {
-				fmt.Printf("- %s (%s:%s)\n", container.Name, container.Image, container.Version)
+				switch strings.ToLower(container.Status) {
+				case "up":
+					runningContainers = append(runningContainers, container)
+				case "paused":
+					pausedContainers = append(pausedContainers, container)
+				case "exited":
+					exitedContainers = append(exitedContainers, container)
+				case "created":
+					createdContainers = append(createdContainers, container)
+				default:
+					unknownContainers = append(unknownContainers, container)
+				}
+			}
+			if len(runningContainers) > 0 {
+				fmt.Printf("[%sRunning%s]\n", colors.GREEN, colors.RESET)
+				for _, container := range runningContainers {
+					fmt.Printf("  - %s (%s:%s)\n", container.Name, container.Image, container.Version)
+				}
+			}
+			if len(pausedContainers) > 0 {
+				fmt.Printf("[%sPaused%s]\n", colors.YELLOW, colors.RESET)
+				for _, container := range pausedContainers {
+					fmt.Printf("  - %s (%s:%s)\n", container.Name, container.Image, container.Version)
+				}
+			}
+			if len(exitedContainers) > 0 {
+				fmt.Printf("[%sStopped%s]\n", colors.RED, colors.RESET)
+				for _, container := range exitedContainers {
+					fmt.Printf("  - %s (%s:%s)\n", container.Name, container.Image, container.Version)
+				}
+			}
+			if len(createdContainers) > 0 {
+				fmt.Printf("[%sCreated%s]\n", colors.BLUE, colors.RESET)
+				for _, container := range createdContainers {
+					fmt.Printf("  - %s (%s:%s)\n", container.Name, container.Image, container.Version)
+				}
+			}
+			if len(unknownContainers) > 0 {
+				fmt.Printf("[%sOther%s]\n", colors.GREY, colors.RESET)
+				for _, container := range unknownContainers {
+					fmt.Printf("  - %s (Image: %s:%s Status: %s)\n", container.Name, container.Image, container.Version, container.Status)
+				}
 			}
 		case "create":
 			if len(args) < 3 {
@@ -130,11 +187,11 @@ func main() {
 			}
 			fmt.Println("Creating container...")
 			if len(args) < 6 {
-				_, err := RemoteRun(GetIpByName(args[2]), fmt.Sprintf("sudo nerdctl run -d --name %s %s", args[3], args[4]))
+				_, err := RemoteRun(GetIpByName(args[2]), fmt.Sprintf("sudo nerdctl run -d --restart=unless-stopped --name %s %s", args[3], args[4]))
 				CheckError(err, "Failed to create container", 1)
 				fmt.Println("Container created")
 			} else {
-				_, err := RemoteRun(GetIpByName(args[2]), fmt.Sprintf("sudo nerdctl run -d -p %s --name %s %s", args[5], args[3], args[4]))
+				_, err := RemoteRun(GetIpByName(args[2]), fmt.Sprintf("sudo nerdctl run -d --restart=unless-stopped -p %s --name %s %s", args[5], args[3], args[4]))
 				CheckError(err, "Failed to create container", 1)
 				fmt.Printf("Container created (with port mapping %s)\n", args[5])
 			}
@@ -197,7 +254,7 @@ func main() {
 			}
 			container := GetContainerByName(args[2])
 			fmt.Println("Starting container...")
-			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl restart %s", container.Name))
+			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl start %s", container.Name))
 			CheckError(err, "Failed to start container", 1)
 			fmt.Printf("Container %s started\n", container.Name)
 		case "restart":
@@ -214,6 +271,34 @@ func main() {
 			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl restart %s", container.Name))
 			CheckError(err, "Failed to restart container", 1)
 			fmt.Printf("Container %s restarted\n", container.Name)
+		case "pause":
+			if len(args) < 3 {
+				fmt.Println("No container name provided")
+				os.Exit(1)
+			}
+			if !CheckIfContainerExists(args[2]) {
+				fmt.Println("Container does not exist")
+				os.Exit(1)
+			}
+			container := GetContainerByName(args[2])
+			fmt.Println("Pausing container...")
+			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl pause %s", container.Name))
+			CheckError(err, "Failed to pause container", 1)
+			fmt.Printf("Container %s paused\n", container.Name)
+		case "unpause":
+			if len(args) < 3 {
+				fmt.Println("No container name provided")
+				os.Exit(1)
+			}
+			if !CheckIfContainerExists(args[2]) {
+				fmt.Println("Container does not exist")
+				os.Exit(1)
+			}
+			container := GetContainerByName(args[2])
+			fmt.Println("Unpausing container...")
+			_, err := RemoteRun(GetIpByName(container.Runner), fmt.Sprintf("sudo nerdctl unpause %s", container.Name))
+			CheckError(err, "Failed to unpause container", 1)
+			fmt.Printf("Container %s unpaused\n", container.Name)
 		}
 	}
 }

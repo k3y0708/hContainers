@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"k3y0708/hContainers/global"
-	. "k3y0708/hContainers/util"
+	"k3y0708/hContainers/util"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )
@@ -19,7 +19,13 @@ const (
 func main() {
 	args := os.Args[1:]
 
-	global.Client = hcloud.NewClient(hcloud.WithToken(os.Getenv("HCLOUD_TOKEN")))
+	hcloudToken, present := os.LookupEnv("HCLOUD_TOKEN")
+	if !present {
+		fmt.Println("HCLOUD_TOKEN not set")
+		os.Exit(1)
+	}
+	global.Client = hcloud.NewClient(hcloud.WithToken(hcloudToken))
+
 	sshKeyPath, present := os.LookupEnv("HCONTAINERS_SSH_KEY_PATH")
 	if !present {
 		fmt.Println("HCONTAINERS_SSH_KEY_PATH not set")
@@ -27,10 +33,10 @@ func main() {
 	}
 	sshKeyPath = strings.Replace(sshKeyPath, "~", os.Getenv("HOME"), 1)
 	publicKeyBytes, err := os.ReadFile(sshKeyPath + ".pub")
-	CheckError(err, "Failed to read public key", 1)
+	util.CheckError(err, "Failed to read public key", 1)
 	global.PublicKey = string(publicKeyBytes)
 	privateKeyBytes, err := os.ReadFile(sshKeyPath)
-	CheckError(err, "Failed to read private key", 1)
+	util.CheckError(err, "Failed to read private key", 1)
 	global.PrivateKey = string(privateKeyBytes)
 
 	if len(args) == 0 {

@@ -2,13 +2,12 @@ package util
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 
 	. "k3y0708/hContainers/types"
 )
 
-func GetAllContainers() []Container {
+func GetAllContainersOld() []Container {
 	var containers []Container
 	for _, server := range GetAllServers() {
 		var stdout string
@@ -36,9 +35,9 @@ func GetAllContainers() []Container {
 }
 
 func CheckIfContainerExists(containerName string) bool {
-	containers := GetAllContainers()
+	containers := GetAllContainersOld()
 	for _, container := range containers {
-		if container.Name == containerName {
+		if container.Name == containerName+"-001" {
 			return true
 		}
 	}
@@ -46,15 +45,11 @@ func CheckIfContainerExists(containerName string) bool {
 }
 
 func GetContainerByName(containerName string) Container {
-	containers := GetAllContainers()
+	containers := GetAllContainersOld()
 	for _, container := range containers {
-		if container.Name == containerName {
+		if container.Name == containerName+"-001" {
 			return container
 		}
 	}
 	return Container{}
-}
-
-func CheckIfContainerNameIsValid(containerName string) bool {
-	return regexp.MustCompile(`^[A-Za-z0-9]+(?:[._-](?:[A-Za-z0-9]+))*$`).MatchString(containerName)
 }

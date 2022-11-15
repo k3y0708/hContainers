@@ -42,7 +42,7 @@ export HCONTAINERS_SSH_KEY_PATH="~/.ssh/id_ed25519"
 # Features
 
 - Create/Delete/List runners
-- Restart runners (only restart if absolutely necessary)
+- Restart runners (_only restart if absolutely necessary_)
 - Create/Delete/List containers
 - Start/Stop/Restart containers
 - Pause/Unpause containers
@@ -58,5 +58,6 @@ _More follows_
 # Tools used by hContainers
 
 - [Hetzner Cloud API](https://docs.hetzner.cloud/)
+- [Hetzner Go Linary](https://github.com/hetznercloud/hcloud-go)
 - [Containerd](https://containerd.io/)
 - [NerdCtl](https://github.com/containerd/nerdctl)

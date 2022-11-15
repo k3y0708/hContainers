@@ -15,6 +15,13 @@ func CheckError(err error, message string, exitCode int) {
 	}
 }
 
+func CheckLength(slice []string, length int, message string, exitCode int) {
+	if len(slice) < length {
+		fmt.Println(message)
+		os.Exit(exitCode)
+	}
+}
+
 func StatusToColor(status string) string {
 	switch strings.ToLower(status) {
 	case "up":

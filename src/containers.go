@@ -20,7 +20,7 @@ func cliContainers(args []string) {
 		util.CheckLength(args, 2, "No runner name provided", 1)
 		util.CheckLength(args, 3, "No container name provided", 1)
 		util.CheckLength(args, 4, "No container image provided", 1)
-		service.ContainerCreate(args[1], args[2], "001", args[3])
+		service.ContainerCreate(args[1], args[2], service.FindLowestPortPrefix(), "001", args[3])
 	case "delete":
 		util.CheckLength(args, 2, "No container name provided", 1)
 		service.ContainerDeleteAll(args[1])

@@ -1,17 +1,18 @@
 package global
 
 const (
-	cV = "v1" // Version of container naming
+	cV    = "v1"             // Version of container naming
+	cName = "%s-%s-%s-" + cV // name, portprefix, instance
 
 	NERDCTL = "sudo nerdctl "
 	LIST    = NERDCTL + "container ls --all --format '{{.Names}} {{.ID}} {{.Image}} {{.Status}}' | sort"
-	CREATE  = NERDCTL + "run -d %s --name %s-%s-" + cV + " %s" // flags, name, instance, image
-	DELETE  = NERDCTL + "rm %s-%s-" + cV + " -f"               // name, instance
-	START   = NERDCTL + "start %s-%s-" + cV + ""               // name, instance
-	STOP    = NERDCTL + "stop %s-%s-" + cV + ""                // name, instance
-	RESTART = NERDCTL + "restart %s-%s-" + cV + ""             // name, instance
-	PAUSE   = NERDCTL + "pause %s-%s-" + cV + ""               // name, instance
-	UNPAUSE = NERDCTL + "unpause %s-%s-" + cV + ""             // name, instance
-	EXEC    = NERDCTL + "exec %s-%s %s-" + cV + ""             // name, instance, command
-	LOGS    = NERDCTL + "logs %s"                              // name
+	CREATE  = NERDCTL + "run -d %s --name " + cName + " %s" // flags, name, instance, image
+	DELETE  = NERDCTL + "rm " + cName + " -f"               // name, portprefix, instance
+	START   = NERDCTL + "start " + cName                    // name, portprefix, instance
+	STOP    = NERDCTL + "stop " + cName                     // name, portprefix, instance
+	RESTART = NERDCTL + "restart " + cName                  // name, portprefix, instance
+	PAUSE   = NERDCTL + "pause " + cName                    // name, portprefix, instance
+	UNPAUSE = NERDCTL + "unpause " + cName                  // name, portprefix, instance
+	EXEC    = NERDCTL + "exec " + cName + " %s"             // name, portprefix, instance, command
+	LOGS    = NERDCTL + "logs " + cName                     // name, portprefix, instance, command
 )

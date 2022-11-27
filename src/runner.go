@@ -3,11 +3,18 @@ package main
 import (
 	"fmt"
 	"k3y0708/hContainers/service"
+	"k3y0708/hContainers/types"
 	"k3y0708/hContainers/util"
 	"os"
+
+	"github.com/jessevdk/go-flags"
 )
 
 func cliRunner(args []string) {
+	if len(args) == 0 {
+		cliRunnerHelp()
+		os.Exit(1)
+	}
 	switch args[0] {
 	case "list":
 		fmt.Printf("Available runners (Amount: %d):\n", util.GetAmountOfRunners())
@@ -24,7 +31,10 @@ func cliRunner(args []string) {
 			fmt.Println("Runner already exists")
 			os.Exit(1)
 		}
-		service.RunnerCreate(args[1])
+		var flag types.FlagsServer
+		_, err := flags.ParseArgs(&flag, args[1:])
+		util.CheckError(err, "Failed to parse flags", 1)
+		service.RunnerCreate(args[1], flag)
 	case "delete":
 		util.CheckLength(args, 2, "No runner name provided", 1)
 		if !util.CheckIfServerExists(args[1]) {

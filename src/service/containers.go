@@ -9,6 +9,8 @@ import (
 	"k3y0708/hContainers/util"
 	"os"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
@@ -17,45 +19,15 @@ import (
 func ContainerList() {
 	var containers = getAllContainers()
 	fmt.Printf("Available containers (Amount: %d):\n", len(containers))
-	runningContainers, pausedContainers, exitedContainers, createdContainers, unknownContainers := assembler.ContainerList(containers)
-	if len(runningContainers) > 0 {
-		fmt.Printf("[%sRunning%s]\n", colors.GREEN, colors.RESET)
-		for _, container := range runningContainers {
-			fmt.Printf("  - %s (%s:%s)\n", container.Name, container.Image, container.Version)
-		}
-	}
-	if len(pausedContainers) > 0 {
-		fmt.Printf("[%sPaused%s]\n", colors.YELLOW, colors.RESET)
-		for _, container := range pausedContainers {
-			fmt.Printf("  - %s (%s:%s)\n", container.Name, container.Image, container.Version)
-		}
-	}
-	if len(exitedContainers) > 0 {
-		fmt.Printf("[%sStopped%s]\n", colors.RED, colors.RESET)
-		for _, container := range exitedContainers {
-			fmt.Printf("  - %s (%s:%s)\n", container.Name, container.Image, container.Version)
-		}
-	}
-	if len(createdContainers) > 0 {
-		fmt.Printf("[%sCreated%s]\n", colors.BLUE, colors.RESET)
-		for _, container := range createdContainers {
-			fmt.Printf("  - %s (%s:%s)\n", container.Name, container.Image, container.Version)
-		}
-	}
-	if len(unknownContainers) > 0 {
-		fmt.Printf("[%sOther%s]\n", colors.GREY, colors.RESET)
-		for _, container := range unknownContainers {
-			fmt.Printf("  - %s (Image: %s:%s Status: %s)\n", container.Name, container.Image, container.Version, container.Status)
-		}
-	}
+	assembler.ContainerToTable(containers)
 }
 
-func ContainerCreate(runnerName string, name string, image string, flags string) {
+func ContainerCreate(runnerName string, name string, instance string, image string) {
 	if !checkIfServerExists(runnerName) {
-		fmt.Println("Runner does not exist")
+		fmt.Printf("Runner %s does not exist\n", runnerName)
 		os.Exit(1)
 	}
-	if checkIfContainerExists(name) {
+	if checkIfContainerInstanceExists(name, instance) {
 		fmt.Println("Container already exists")
 		os.Exit(1)
 	}
@@ -64,21 +36,35 @@ func ContainerCreate(runnerName string, name string, image string, flags string)
 		os.Exit(1)
 	}
 	fmt.Println("Creating container...")
-	_, err := util.RemoteRun(util.GetIpByName(runnerName), fmt.Sprintf(global.CREATE, flags, name, image))
+	_, err := util.RemoteRun(util.GetIpByName(runnerName), fmt.Sprintf(global.CREATE, "-p 8080:8"+instance, name, instance, image))
 	util.CheckError(err, "Failed to create container", 1)
 	fmt.Println("Container created")
 }
 
-func ContainerDelete(name string) {
+func ContainerDeleteAll(name string) {
 	if !checkIfContainerExists(name) {
 		fmt.Println("Container does not exist")
 		os.Exit(1)
 	}
-	fmt.Println("Deleting container...")
-	container := util.GetContainerByName(name)
-	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.DELETE, container.Name))
+	container := getContainersByName(name)
+	for _, c := range container {
+		containerDelete(c.Name, c.Instance)
+	}
+	fmt.Printf("Container %s deleted\n", name)
+}
+
+func containerDelete(name, instance string) {
+	if !checkIfContainerExists(name) {
+		fmt.Println("Container does not exist")
+		os.Exit(1)
+	}
+	container := getContainerByNameAndInstance(name, instance)
+	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.DELETE, container.Name, container.Instance))
+	if err != nil {
+		fmt.Println("Failed to delete container")
+		fmt.Println(err)
+	}
 	util.CheckError(err, "Failed to delete container", 1)
-	fmt.Printf("Container %s deleted\n", container.Name)
 }
 
 func ContainerStart(name string) {
@@ -86,11 +72,12 @@ func ContainerStart(name string) {
 		fmt.Println("Container does not exist")
 		os.Exit(1)
 	}
-	fmt.Println("Starting container...")
-	container := util.GetContainerByName(name)
-	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.START, container.Name))
-	util.CheckError(err, "Failed to start container", 1)
-	fmt.Printf("Container %s started\n", container.Name)
+	containers := getContainersByName(name)
+	for _, c := range containers {
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.START, c.Name, c.Instance))
+		util.CheckError(err, "Failed to start container", 1)
+	}
+	fmt.Printf("Container %s started\n", name)
 }
 
 func ContainerStop(name string) {
@@ -98,11 +85,12 @@ func ContainerStop(name string) {
 		fmt.Println("Container does not exist")
 		os.Exit(1)
 	}
-	fmt.Println("Stopping container...")
-	container := util.GetContainerByName(name)
-	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.STOP, container.Name))
-	util.CheckError(err, "Failed to stop container", 1)
-	fmt.Printf("Container %s stopped\n", container.Name)
+	containers := getContainersByName(name)
+	for _, c := range containers {
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.STOP, c.Name, c.Instance))
+		util.CheckError(err, "Failed to stop container", 1)
+	}
+	fmt.Printf("Container %s stopped\n", name)
 }
 
 func ContainerRestart(name string) {
@@ -110,11 +98,12 @@ func ContainerRestart(name string) {
 		fmt.Println("Container does not exist")
 		os.Exit(1)
 	}
-	fmt.Println("Restarting container...")
-	container := util.GetContainerByName(name)
-	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.RESTART, container.Name))
-	util.CheckError(err, "Failed to restart container", 1)
-	fmt.Printf("Container %s restarted\n", container.Name)
+	containers := getContainersByName(name)
+	for _, c := range containers {
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.RESTART, c.Name, c.Instance))
+		util.CheckError(err, "Failed to restart container", 1)
+	}
+	fmt.Printf("Container %s restarted\n", name)
 }
 
 func ContainerPause(name string) {
@@ -123,10 +112,12 @@ func ContainerPause(name string) {
 		os.Exit(1)
 	}
 	fmt.Println("Pausing container...")
-	container := util.GetContainerByName(name)
-	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.PAUSE, container.Name))
-	util.CheckError(err, "Failed to pause container", 1)
-	fmt.Printf("Container %s paused\n", container.Name)
+	containers := getContainersByName(name)
+	for _, c := range containers {
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.PAUSE, c.Name, c.Instance))
+		util.CheckError(err, "Failed to pause container", 1)
+	}
+	fmt.Printf("Container %s paused\n", name)
 }
 
 func ContainerUnpause(name string) {
@@ -135,43 +126,74 @@ func ContainerUnpause(name string) {
 		os.Exit(1)
 	}
 	fmt.Println("Unpausing container...")
-	container := util.GetContainerByName(name)
-	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.UNPAUSE, container.Name))
-	util.CheckError(err, "Failed to unpause container", 1)
-	fmt.Printf("Container %s unpaused\n", container.Name)
+	containers := getContainersByName(name)
+	for _, c := range containers {
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.UNPAUSE, c.Name, c.Instance))
+		util.CheckError(err, "Failed to unpause container", 1)
+	}
+	fmt.Printf("Container %s unpaused\n", name)
 }
 
-func ContainerExec(name string, command string) {
-	if !checkIfContainerExists(name) {
-		fmt.Println("Container does not exist")
+func ContainerExec(name, instance, command string) {
+	if !checkIfContainerInstanceExists(name, instance) {
+		fmt.Println("Container Instance does not exist")
 		os.Exit(1)
 	}
 	fmt.Println(colors.GREY + "Note: Commands which require user input are not supported" + colors.RESET)
-	fmt.Println("Executing command...")
-	container := util.GetContainerByName(name)
-	stdout, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.EXEC, container.Name, command))
+	container := getContainerByNameAndInstance(name, instance)
+	stdout, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.EXEC, container.Name, container.Instance, command))
 	util.CheckError(err, "Failed to exec command", 1)
 	fmt.Println(stdout)
 	fmt.Println("Executed command")
 }
 
-func ContainerLogs(name string) {
+func ContainerLogs(name, instance string) {
+	if !checkIfContainerInstanceExists(name, instance) {
+		fmt.Println("Container Instance does not exist")
+		os.Exit(1)
+	}
+	container := getContainerByNameAndInstance(name, instance)
+	stdout, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.LOGS, container.Name))
+	util.CheckError(err, "Failed to get logs", 1)
+	fmt.Println(stdout)
+}
+
+func ContainerScale(name string, amount int) {
+	if amount < 1 {
+		fmt.Println("Scale must be greater than 0")
+		os.Exit(1)
+	}
 	if !checkIfContainerExists(name) {
 		fmt.Println("Container does not exist")
 		os.Exit(1)
 	}
-	fmt.Println("Getting logs...")
-	container := util.GetContainerByName(name)
-	stdout, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.LOGS, container.Name))
-	util.CheckError(err, "Failed to get logs", 1)
-	fmt.Println(stdout)
-	fmt.Println("Got logs")
+	fmt.Println("Scaling container...")
+	container := getContainersByName(name)
+	if len(container) == amount {
+		fmt.Println("Container already scaled to that amount")
+		os.Exit(0)
+	}
+	if len(container) > amount {
+		containerScaleDown(name, len(container)-amount)
+	} else {
+		containerScaleUp(name, amount-len(container))
+	}
 }
 
 func checkIfContainerExists(containerName string) bool {
 	containers := getAllContainers()
 	for _, container := range containers {
-		if container.Name == containerName+"-001" {
+		if container.Name == containerName {
+			return true
+		}
+	}
+	return false
+}
+
+func checkIfContainerInstanceExists(containerName string, instance string) bool {
+	containers := getAllContainers()
+	for _, container := range containers {
+		if container.Name == containerName && container.Instance == instance {
 			return true
 		}
 	}
@@ -179,7 +201,7 @@ func checkIfContainerExists(containerName string) bool {
 }
 
 func checkIfContainerNameIsValid(containerName string) bool {
-	return regexp.MustCompile(`^[A-Za-z0-9]+(?:[._-](?:[A-Za-z0-9]+))*$`).MatchString(containerName)
+	return regexp.MustCompile(`^[A-Za-z0-9]+(?:[._](?:[A-Za-z0-9]+))*$`).MatchString(containerName)
 }
 
 func getAllContainers() []Container {
@@ -212,4 +234,75 @@ func getContainersFromRunner(runner *hcloud.Server) []Container {
 		}
 	}
 	return containers
+}
+
+func getContainerByName(containerName string) Container {
+	containers := getAllContainers()
+	for _, container := range containers {
+		if container.Name == containerName {
+			return container
+		}
+	}
+	return Container{}
+}
+
+func getContainerByNameAndInstance(containerName string, instance string) Container {
+	containers := getAllContainers()
+	for _, container := range containers {
+		if container.Name == containerName && container.Instance == instance {
+			return container
+		}
+	}
+	return Container{}
+}
+
+func getContainersByName(containerName string) []Container {
+	var containers []Container
+	for _, container := range getAllContainers() {
+		if container.Name == containerName {
+			containers = append(containers, container)
+		}
+	}
+	return containers
+}
+
+func getFreeInstanceNumber(containerName string) string {
+	containers := getContainersByName(containerName)
+	if len(containers) == 0 {
+		return "001"
+	}
+	var instanceNumbers []int
+	for _, container := range containers {
+		instanceNumber, _ := strconv.Atoi(container.Instance)
+		instanceNumbers = append(instanceNumbers, instanceNumber)
+	}
+	sort.Ints(instanceNumbers)
+	for i := 0; i < len(instanceNumbers); i++ {
+		if instanceNumbers[i] != i+1 {
+			return fmt.Sprintf("%03d", i+1)
+		}
+	}
+	return fmt.Sprintf("%03d", len(instanceNumbers)+1)
+}
+
+func containerScaleUp(containerName string, amount int) {
+	fmt.Printf("Scaling up container %s by %d\n", containerName, amount)
+	container := getContainerByName(containerName)
+	for i := 0; i < amount; i++ {
+		instanceNumber := getFreeInstanceNumber(containerName)
+		ContainerCreate(container.Runner, containerName, instanceNumber, container.Image+":"+container.Version)
+	}
+	fmt.Println("Scaled up container")
+}
+
+func containerScaleDown(containerName string, amount int) {
+	fmt.Printf("Scaling down container %s by %d\n", containerName, amount)
+	containers := getContainersByName(containerName)
+	sort.Slice(containers, func(i, j int) bool {
+		return containers[i].Instance < containers[j].Instance
+	})
+	for i := 0; i < amount; i++ {
+		containerDelete(containers[i].Name, containers[i].Instance)
+	}
+	fmt.Println("Scaled down container")
 }

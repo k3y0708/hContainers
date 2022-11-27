@@ -1,15 +1,17 @@
 package global
 
 const (
+	cV = "v1" // Version of container naming
+
 	NERDCTL = "sudo nerdctl "
-	LIST    = NERDCTL + "container ls --all --format '{{.Names}} {{.ID}} {{.Image}} {{.Status}}'"
-	CREATE  = NERDCTL + "run -d %s --name %s-001 %s" // flags, name, image
-	DELETE  = NERDCTL + "rm %s -f"                   // name
-	START   = NERDCTL + "start %s"                   // name
-	STOP    = NERDCTL + "stop %s"                    // name
-	RESTART = NERDCTL + "restart %s"                 // name
-	PAUSE   = NERDCTL + "pause %s"                   // name
-	UNPAUSE = NERDCTL + "unpause %s"                 // name
-	EXEC    = NERDCTL + "exec %s %s"                 // name, command
-	LOGS    = NERDCTL + "logs %s"                    // name
+	LIST    = NERDCTL + "container ls --all --format '{{.Names}} {{.ID}} {{.Image}} {{.Status}}' | sort"
+	CREATE  = NERDCTL + "run -d %s --name %s-%s-" + cV + " %s" // flags, name, instance, image
+	DELETE  = NERDCTL + "rm %s-%s-" + cV + " -f"               // name, instance
+	START   = NERDCTL + "start %s-%s-" + cV + ""               // name, instance
+	STOP    = NERDCTL + "stop %s-%s-" + cV + ""                // name, instance
+	RESTART = NERDCTL + "restart %s-%s-" + cV + ""             // name, instance
+	PAUSE   = NERDCTL + "pause %s-%s-" + cV + ""               // name, instance
+	UNPAUSE = NERDCTL + "unpause %s-%s-" + cV + ""             // name, instance
+	EXEC    = NERDCTL + "exec %s-%s %s-" + cV + ""             // name, instance, command
+	LOGS    = NERDCTL + "logs %s"                              // name
 )

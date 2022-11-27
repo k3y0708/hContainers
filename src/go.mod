@@ -8,7 +8,9 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
+	github.com/hContainers/crayon v0.1.1 // indirect
 	github.com/hetznercloud/hcloud-go v1.37.0 // indirect
+	github.com/jessevdk/go-flags v1.5.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/prometheus/client_golang v1.11.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect

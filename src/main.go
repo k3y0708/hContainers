@@ -50,6 +50,8 @@ func main() {
 		cliHelp()
 	case "runner":
 		cliRunner(args[1:])
+	case "locations":
+		cliLocations(args[1:])
 	case "containers":
 		cliContainers(args[1:])
 	case "container":

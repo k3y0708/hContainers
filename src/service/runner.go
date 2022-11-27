@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"k3y0708/hContainers/global"
+	"k3y0708/hContainers/types"
 	"k3y0708/hContainers/util"
 	"strings"
 
@@ -29,15 +30,18 @@ func RunnerDelete(name string) {
 	fmt.Println("Runner deleted")
 }
 
-func RunnerCreate(name string) {
+func RunnerCreate(name string, flags types.FlagsServer) {
 	fmt.Println("Creating runner...")
+	location := getLocationByName(flags.Location)
+	fmt.Println("Location:", location.Name)
+	fmt.Println("Description:", location.Description)
 	create_options := hcloud.ServerCreateOpts{
 		Name:       name,
-		ServerType: &hcloud.ServerType{Name: "cx11"},
+		ServerType: &hcloud.ServerType{Name: flags.Sku},
 		Image:      &hcloud.Image{Name: "ubuntu-22.04"},
-		Location:   &hcloud.Location{City: "fsn1"},
+		Location:   location,
 		UserData:   strings.Replace(cloudinit, "{{{PUBLIC_KEY}}}", global.PublicKey, 1),
-		PublicNet:  &hcloud.ServerCreatePublicNet{EnableIPv4: true, EnableIPv6: true},
+		PublicNet:  &hcloud.ServerCreatePublicNet{EnableIPv4: true, EnableIPv6: !flags.DisableIPv6},
 		Labels:     map[string]string{"runner": "true"},
 	}
 	_, _, err := global.Client.Server.Create(context.Background(), create_options)

@@ -7,6 +7,7 @@ func cliHelp() {
 	fmt.Println("Commands:")
 	runnerHelp()
 	containerHelp()
+	locationsHelp()
 	fmt.Println("  help                                                                - Show this help message")
 }
 
@@ -22,6 +23,12 @@ func cliRunnerHelp() {
 	runnerHelp()
 }
 
+func cliLocationsHelp() {
+	fmt.Println("Usage: hContainers locations [arguments]")
+	fmt.Println("Commands:")
+	locationsHelp()
+}
+
 func runnerHelp() {
 	fmt.Println("  runner list                                                         - List all available runners")
 	fmt.Println("  runner create <runner-name>                                         - Create a new runner")
@@ -31,7 +38,6 @@ func runnerHelp() {
 func containerHelp() {
 	fmt.Println("  containers list                                                      - List all available containers")
 	fmt.Println("  containers create <runner-name> <container-name> <image>             - Create a new container")
-	fmt.Println("  containers create <runner-name> <container-name> <image> <port:port> - Create a new container with port mapping")
 	fmt.Println("  containers delete <name>                                             - Delete a container")
 	fmt.Println("  containers start <name>                                              - Start a container")
 	fmt.Println("  containers stop <name>                                               - Stop a container")
@@ -40,4 +46,8 @@ func containerHelp() {
 	fmt.Println("  containers unpause <name>                                            - Unpause a container")
 	fmt.Println("  containers exec <name> <command>                                     - Execute a command in a container (Non-interactive)")
 	fmt.Println("  containers logs <name>                                               - Show logs of a container")
+}
+
+func locationsHelp() {
+	fmt.Println("  locations list                                                       - List all available locations")
 }

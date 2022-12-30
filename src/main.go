@@ -43,18 +43,22 @@ func main() {
 	switch args[0] {
 	case "help":
 		cliHelp()
-	case "runner":
+	case "runners":
 		cliRunner(args[1:])
 	case "locations":
 		cliLocations(args[1:])
 	case "containers":
 		cliContainers(args[1:])
-	case "container":
-		fmt.Println("Invalid command\nDid you mean 'containers'?")
 	case "version":
 		fmt.Println(global.Version)
+
 	default:
 		fmt.Println("Invalid command")
-		cliHelp()
+		nearestCommand := util.FindNearestCommand(args[0], []string{"help", "runners", "locations", "containers", "version"})
+		if nearestCommand != "" {
+			fmt.Println("Did you mean 'hContainers " + nearestCommand + "'?")
+		} else {
+			cliHelp()
+		}
 	}
 }

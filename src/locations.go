@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/hContainers/hContainers/service"
+	"github.com/hContainers/hContainers/util"
 )
 
 func cliLocations(args []string) {
@@ -15,6 +17,12 @@ func cliLocations(args []string) {
 	case "list":
 		service.LocationList()
 	default:
-		cliLocationsHelp()
+		fmt.Println("Invalid command")
+		nearestCommand := util.FindNearestCommand(args[0], []string{"list"})
+		if nearestCommand != "" {
+			fmt.Println("Did you mean 'hContainers locations " + nearestCommand + "'?")
+		} else {
+			cliLocationsHelp()
+		}
 	}
 }

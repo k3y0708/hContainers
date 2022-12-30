@@ -51,6 +51,12 @@ func cliRunner(args []string) {
 		}
 		service.RunnerRestart(args[1])
 	default:
-		cliRunnerHelp()
+		fmt.Println("Invalid command")
+		nearestCommand := util.FindNearestCommand(args[0], []string{"list", "create", "delete", "restart"})
+		if nearestCommand != "" {
+			fmt.Println("Did you mean 'hContainers runners " + nearestCommand + "'?")
+		} else {
+			cliRunnerHelp()
+		}
 	}
 }

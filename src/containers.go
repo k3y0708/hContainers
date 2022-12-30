@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -56,6 +57,12 @@ func cliContainers(args []string) {
 		util.CheckError(err, "Invalid scale", 1)
 		service.ContainerScale(args[1], scale)
 	default:
-		cliContainersHelp()
+		fmt.Println("Invalid command")
+		nearestCommand := util.FindNearestCommand(args[0], []string{"list", "create", "delete", "exec", "stop", "start", "restart", "pause", "unpause", "logs", "scale"})
+		if nearestCommand != "" {
+			fmt.Println("Did you mean 'hContainers containers " + nearestCommand + "'?")
+		} else {
+			cliContainersHelp()
+		}
 	}
 }

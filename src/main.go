@@ -51,8 +51,8 @@ func main() {
 		cliContainers(args[1:])
 	case "container":
 		fmt.Println("Invalid command\nDid you mean 'containers'?")
-	case "commit":
-		fmt.Println("Version: " + global.Version)
+	case "version":
+		fmt.Println(global.Version)
 	default:
 		fmt.Println("Invalid command")
 		cliHelp()

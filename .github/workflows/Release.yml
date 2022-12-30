@@ -16,11 +16,13 @@ jobs:
           fetch-depth: 0
       - name: build
         run: make deploy
+        shell: bash
       - name: version
         run: echo "::set-output name=version::$(./dist/hContainers version)"
         id: version
       - name: build artifacts
         run: make deploy_all
+        shell: bash
       - name: release
         uses: actions/create-release@v1
         id: create_release

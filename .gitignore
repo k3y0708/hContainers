@@ -1,5 +1,6 @@
 # Compiled files and binaries
-dist/**/*
+dist
+build
 *.exe
 *.exe~
 *.dll
@@ -19,3 +20,5 @@ dist/**/*
 
 # OS generated files
 .DS_Store
+
+_ignore

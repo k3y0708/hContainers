@@ -1,6 +1,11 @@
 package global
 
 const (
+	HCLOUD_API_URL = "https://api.hetzner.cloud/v1"
+
+	ENV_HETZNER_TOKEN = "HCLOUD_TOKEN"
+	ENV_SSH_KEY_PATH  = "HCONTAINERS_SSH_KEY_PATH"
+
 	cV    = "v1"             // Version of container naming
 	cName = "%s-%s-%s-" + cV // name, portprefix, instance
 

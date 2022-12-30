@@ -11,24 +11,19 @@ import (
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )
 
-const (
-	HCLOUD_API_URL = "https://api.hetzner.cloud/v1"
-	CONFIG_FILE    = "config.ini"
-)
-
 func main() {
 	args := os.Args[1:]
 
-	hcloudToken, present := os.LookupEnv("HCLOUD_TOKEN")
+	hcloudToken, present := os.LookupEnv(global.ENV_HETZNER_TOKEN)
 	if !present {
-		fmt.Println("HCLOUD_TOKEN not set")
+		fmt.Println(global.ENV_HETZNER_TOKEN + " not set")
 		os.Exit(1)
 	}
 	global.Client = hcloud.NewClient(hcloud.WithToken(hcloudToken))
 
-	sshKeyPath, present := os.LookupEnv("HCONTAINERS_SSH_KEY_PATH")
+	sshKeyPath, present := os.LookupEnv(global.ENV_SSH_KEY_PATH)
 	if !present {
-		fmt.Println("HCONTAINERS_SSH_KEY_PATH not set")
+		fmt.Println(global.ENV_SSH_KEY_PATH + " not set")
 		os.Exit(1)
 	}
 	sshKeyPath = strings.Replace(sshKeyPath, "~", os.Getenv("HOME"), 1)

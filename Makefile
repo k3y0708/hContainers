@@ -45,7 +45,7 @@ compile_all: compile_windows_32 compile_windows_64 compile_linux_32 compile_linu
 
 # Deploy (build with version number) ------------------------------------------
 checkIfDeployable:
-	@if [[ "${shell git describe --tags}" =~ ^[0-9].[0-9].[0-9]$$ ]]; then \
+	@if [[ "${shell git describe --tags}" =~ ^v[0-9].[0-9].[0-9]$$ ]]; then \
 		echo "Deploying..."; \
 	 else \
 		echo "Not deploying..."; \

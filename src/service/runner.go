@@ -3,10 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
-	"k3y0708/hContainers/global"
-	"k3y0708/hContainers/types"
-	"k3y0708/hContainers/util"
 	"strings"
+
+	"github.com/hContainers/hContainers/global"
+	"github.com/hContainers/hContainers/types"
+	"github.com/hContainers/hContainers/util"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 

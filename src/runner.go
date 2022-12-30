@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"k3y0708/hContainers/service"
-	"k3y0708/hContainers/types"
-	"k3y0708/hContainers/util"
 	"os"
+
+	"github.com/hContainers/hContainers/service"
+	"github.com/hContainers/hContainers/types"
+	"github.com/hContainers/hContainers/util"
 
 	"github.com/jessevdk/go-flags"
 )

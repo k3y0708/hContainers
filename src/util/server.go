@@ -4,7 +4,7 @@ import (
 	"context"
 	"regexp"
 
-	"k3y0708/hContainers/global"
+	"github.com/hContainers/hContainers/global"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )

@@ -2,9 +2,10 @@ package util
 
 import (
 	"fmt"
-	"k3y0708/hContainers/colors"
 	"os"
 	"strings"
+
+	"github.com/hContainers/hContainers/colors"
 )
 
 func CheckError(err error, message string, exitCode int) {
@@ -33,4 +34,11 @@ func StatusToColor(status string) string {
 	default:
 		return colors.WHITE
 	}
+}
+
+func Copy(src string, dst string) {
+	data, err := os.ReadFile(src)
+	CheckError(err, "Failed to read file", 1)
+	err = os.WriteFile(dst, data, 0755)
+	CheckError(err, "Failed to write file", 1)
 }

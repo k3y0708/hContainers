@@ -5,9 +5,9 @@ import (
 	"os"
 	"strings"
 
-	"k3y0708/hContainers/global"
-	"k3y0708/hContainers/util"
+	"github.com/hContainers/hContainers/util"
 
+	"github.com/hContainers/hContainers/global"
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )
 

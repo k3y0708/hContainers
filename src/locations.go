@@ -1,8 +1,9 @@
 package main
 
 import (
-	"k3y0708/hContainers/service"
 	"os"
+
+	"github.com/hContainers/hContainers/service"
 )
 
 func cliLocations(args []string) {

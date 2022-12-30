@@ -2,16 +2,17 @@ package service
 
 import (
 	"fmt"
-	"k3y0708/hContainers/assembler"
-	"k3y0708/hContainers/colors"
-	"k3y0708/hContainers/global"
-	. "k3y0708/hContainers/types"
-	"k3y0708/hContainers/util"
 	"os"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/hContainers/hContainers/assembler"
+	"github.com/hContainers/hContainers/colors"
+	"github.com/hContainers/hContainers/global"
+	. "github.com/hContainers/hContainers/types"
+	"github.com/hContainers/hContainers/util"
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )
@@ -19,7 +20,7 @@ import (
 func ContainerList() {
 	var containers = getAllContainers()
 	fmt.Printf("Available containers (Amount: %d):\n", len(containers))
-	assembler.ContainerToTable(containers)
+	assembler.ContainerToMap(containers)
 }
 
 func ContainerCreate(runnerName, name, portPrefix, instance, image string) {
@@ -291,7 +292,7 @@ func containerScaleUp(containerName string, amount int) {
 	container := getContainerByName(containerName)
 	for i := 0; i < amount; i++ {
 		instanceNumber := getFreeInstanceNumber(containerName)
-		ContainerCreate(container.Runner, container.Name, container.PortPrefix, instanceNumber, container.Image+":"+container.Version)
+		ContainerCreate(container.Runner, container.Name, container.PortPrefix, instanceNumber, container.GetFullImageName())
 	}
 	fmt.Println("Scaled up container")
 }

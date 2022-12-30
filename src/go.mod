@@ -1,4 +1,4 @@
-module k3y0708/hContainers
+module github.com/hContainers/hContainers
 
 go 1.19
 

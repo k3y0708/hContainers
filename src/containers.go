@@ -1,11 +1,12 @@
 package main
 
 import (
-	"k3y0708/hContainers/service"
-	"k3y0708/hContainers/util"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/hContainers/hContainers/service"
+	"github.com/hContainers/hContainers/util"
 )
 
 func cliContainers(args []string) {

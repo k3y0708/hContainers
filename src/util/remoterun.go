@@ -2,8 +2,9 @@ package util
 
 import (
 	"bytes"
-	"k3y0708/hContainers/global"
 	"net"
+
+	"github.com/hContainers/hContainers/global"
 
 	"golang.org/x/crypto/ssh"
 )

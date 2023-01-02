@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hContainers/hContainers/assembler"
 	"github.com/hContainers/hContainers/colors"
 	"github.com/hContainers/hContainers/global"
 	. "github.com/hContainers/hContainers/types"
@@ -16,12 +15,6 @@ import (
 
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )
-
-func ContainerList() {
-	var containers = getAllContainers()
-	fmt.Printf("Available containers (Amount: %d):\n", len(containers))
-	assembler.ContainerToMap(containers)
-}
 
 func ContainerCreate(runnerName, name, portPrefix, instance, image string) {
 	if !checkIfServerExists(runnerName) {
@@ -36,10 +29,8 @@ func ContainerCreate(runnerName, name, portPrefix, instance, image string) {
 		fmt.Println("Container name is not valid")
 		os.Exit(1)
 	}
-	fmt.Println("Creating container...")
-	_, err := util.RemoteRun(util.GetIpByName(runnerName), fmt.Sprintf(global.CREATE, "-p 8080:"+portPrefix+instance, name, portPrefix, instance, image))
+	_, err := util.RemoteRun(util.GetIpByName(runnerName), fmt.Sprintf(global.CREATE, "-p 8080:"+portPrefix+instance, name, portPrefix, instance, image), 2)
 	util.CheckError(err, "Failed to create container", 1)
-	fmt.Println("Container created")
 }
 
 func ContainerDeleteAll(name string) {
@@ -51,7 +42,6 @@ func ContainerDeleteAll(name string) {
 	for _, c := range container {
 		containerDelete(c.Name, c.Instance)
 	}
-	fmt.Printf("Container %s deleted\n", name)
 }
 
 func containerDelete(name, instance string) {
@@ -60,7 +50,7 @@ func containerDelete(name, instance string) {
 		os.Exit(1)
 	}
 	container := getContainerByNameAndInstance(name, instance)
-	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.DELETE, container.Name, container.PortPrefix, container.Instance))
+	_, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.DELETE, container.Name, container.PortPrefix, container.Instance), 2)
 	if err != nil {
 		fmt.Println("Failed to delete container")
 		fmt.Println(err)
@@ -75,10 +65,9 @@ func ContainerStart(name string) {
 	}
 	containers := getContainersByName(name)
 	for _, c := range containers {
-		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.START, c.Name, c.PortPrefix, c.Instance))
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.START, c.Name, c.PortPrefix, c.Instance), 2)
 		util.CheckError(err, "Failed to start container", 1)
 	}
-	fmt.Printf("Container %s started\n", name)
 }
 
 func ContainerStop(name string) {
@@ -88,10 +77,9 @@ func ContainerStop(name string) {
 	}
 	containers := getContainersByName(name)
 	for _, c := range containers {
-		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.STOP, c.Name, c.PortPrefix, c.Instance))
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.STOP, c.Name, c.PortPrefix, c.Instance), 2)
 		util.CheckError(err, "Failed to stop container", 1)
 	}
-	fmt.Printf("Container %s stopped\n", name)
 }
 
 func ContainerRestart(name string) {
@@ -101,10 +89,9 @@ func ContainerRestart(name string) {
 	}
 	containers := getContainersByName(name)
 	for _, c := range containers {
-		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.RESTART, c.Name, c.PortPrefix, c.Instance))
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.RESTART, c.Name, c.PortPrefix, c.Instance), 2)
 		util.CheckError(err, "Failed to restart container", 1)
 	}
-	fmt.Printf("Container %s restarted\n", name)
 }
 
 func ContainerPause(name string) {
@@ -115,10 +102,9 @@ func ContainerPause(name string) {
 	fmt.Println("Pausing container...")
 	containers := getContainersByName(name)
 	for _, c := range containers {
-		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.PAUSE, c.Name, c.PortPrefix, c.Instance))
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.PAUSE, c.Name, c.PortPrefix, c.Instance), 2)
 		util.CheckError(err, "Failed to pause container", 1)
 	}
-	fmt.Printf("Container %s paused\n", name)
 }
 
 func ContainerUnpause(name string) {
@@ -129,10 +115,9 @@ func ContainerUnpause(name string) {
 	fmt.Println("Unpausing container...")
 	containers := getContainersByName(name)
 	for _, c := range containers {
-		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.UNPAUSE, c.Name, c.PortPrefix, c.Instance))
+		_, err := util.RemoteRun(util.GetIpByName(c.Runner), fmt.Sprintf(global.UNPAUSE, c.Name, c.PortPrefix, c.Instance), 2)
 		util.CheckError(err, "Failed to unpause container", 1)
 	}
-	fmt.Printf("Container %s unpaused\n", name)
 }
 
 func ContainerExec(name, instance, command string) {
@@ -142,10 +127,9 @@ func ContainerExec(name, instance, command string) {
 	}
 	fmt.Println(colors.GREY + "Note: Commands which require user input are not supported" + colors.RESET)
 	container := getContainerByNameAndInstance(name, instance)
-	stdout, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.EXEC, container.Name, container.PortPrefix, container.Instance, command))
+	stdout, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.EXEC, container.Name, container.PortPrefix, container.Instance, command), 2)
 	util.CheckError(err, "Failed to exec command", 1)
 	fmt.Println(stdout)
-	fmt.Println("Executed command")
 }
 
 func ContainerLogs(name, instance string) {
@@ -154,7 +138,7 @@ func ContainerLogs(name, instance string) {
 		os.Exit(1)
 	}
 	container := getContainerByNameAndInstance(name, instance)
-	stdout, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.LOGS, container.Name, container.PortPrefix, container.Instance))
+	stdout, err := util.RemoteRun(util.GetIpByName(container.Runner), fmt.Sprintf(global.LOGS, container.Name, container.PortPrefix, container.Instance), 2)
 	util.CheckError(err, "Failed to get logs", 1)
 	fmt.Println(stdout)
 }
@@ -168,7 +152,6 @@ func ContainerScale(name string, amount int) {
 		fmt.Println("Container does not exist")
 		os.Exit(1)
 	}
-	fmt.Println("Scaling container...")
 	container := getContainersByName(name)
 	if len(container) == amount {
 		fmt.Println("Container already scaled to that amount")
@@ -182,7 +165,7 @@ func ContainerScale(name string, amount int) {
 }
 
 func checkIfContainerExists(containerName string) bool {
-	containers := getAllContainers()
+	containers := GetAllContainers()
 	for _, container := range containers {
 		if container.Name == containerName {
 			return true
@@ -192,7 +175,7 @@ func checkIfContainerExists(containerName string) bool {
 }
 
 func checkIfContainerInstanceExists(containerName string, instance string) bool {
-	containers := getAllContainers()
+	containers := GetAllContainers()
 	for _, container := range containers {
 		if container.Name == containerName && container.Instance == instance {
 			return true
@@ -205,7 +188,7 @@ func checkIfContainerNameIsValid(containerName string) bool {
 	return regexp.MustCompile(`^[A-Za-z0-9]+(?:[._](?:[A-Za-z0-9]+))*$`).MatchString(containerName)
 }
 
-func getAllContainers() []Container {
+func GetAllContainers() []Container {
 	var containers []Container
 	for _, server := range GetAllServers() {
 		containers = append(containers, getContainersFromRunner(server)...)
@@ -216,7 +199,7 @@ func getAllContainers() []Container {
 func getContainersFromRunner(runner *hcloud.Server) []Container {
 	var containers []Container
 
-	stdout, err := util.RemoteRun(runner.PublicNet.IPv4.IP.String(), global.LIST)
+	stdout, err := util.RemoteRun(runner.PublicNet.IPv4.IP.String(), global.LIST, 2)
 	util.CheckError(err, "Failed to get containers", -1)
 
 	for _, container := range strings.Split(stdout, "\n") {
@@ -239,7 +222,7 @@ func getContainersFromRunner(runner *hcloud.Server) []Container {
 }
 
 func getContainerByName(containerName string) Container {
-	containers := getAllContainers()
+	containers := GetAllContainers()
 	for _, container := range containers {
 		if container.Name == containerName {
 			return container
@@ -249,7 +232,7 @@ func getContainerByName(containerName string) Container {
 }
 
 func getContainerByNameAndInstance(containerName string, instance string) Container {
-	containers := getAllContainers()
+	containers := GetAllContainers()
 	for _, container := range containers {
 		if container.Name == containerName && container.Instance == instance {
 			return container
@@ -258,9 +241,15 @@ func getContainerByNameAndInstance(containerName string, instance string) Contai
 	return Container{}
 }
 
+/*
+Returns all instances of a container
+
+@param containerName: Name of the container
+@return: List of containers
+*/
 func getContainersByName(containerName string) []Container {
 	var containers []Container
-	for _, container := range getAllContainers() {
+	for _, container := range GetAllContainers() {
 		if container.Name == containerName {
 			containers = append(containers, container)
 		}
@@ -288,17 +277,14 @@ func getFreeInstanceNumber(containerName string) string {
 }
 
 func containerScaleUp(containerName string, amount int) {
-	fmt.Printf("Scaling up container %s by %d\n", containerName, amount)
 	container := getContainerByName(containerName)
 	for i := 0; i < amount; i++ {
 		instanceNumber := getFreeInstanceNumber(containerName)
 		ContainerCreate(container.Runner, container.Name, container.PortPrefix, instanceNumber, container.GetFullImageName())
 	}
-	fmt.Println("Scaled up container")
 }
 
 func containerScaleDown(containerName string, amount int) {
-	fmt.Printf("Scaling down container %s by %d\n", containerName, amount)
 	containers := getContainersByName(containerName)
 	sort.Slice(containers, func(i, j int) bool {
 		return containers[i].Instance < containers[j].Instance
@@ -306,13 +292,12 @@ func containerScaleDown(containerName string, amount int) {
 	for i := 0; i < amount; i++ {
 		containerDelete(containers[i].Name, containers[i].Instance)
 	}
-	fmt.Println("Scaled down container")
 }
 
 func FindLowestPortPrefix() string {
 	var portPrefixes []int
 	var scannedContainers []string
-	for _, container := range getAllContainers() {
+	for _, container := range GetAllContainers() {
 		if util.Contains(scannedContainers, container.Name) {
 			continue
 		}

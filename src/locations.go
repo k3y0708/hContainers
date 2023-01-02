@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/hContainers/hContainers/assembler"
+	"github.com/hContainers/hContainers/printer"
 	"github.com/hContainers/hContainers/service"
 	"github.com/hContainers/hContainers/util"
 )
@@ -15,7 +17,7 @@ func cliLocations(args []string) {
 	}
 	switch args[0] {
 	case "list":
-		service.LocationList()
+		printer.LocationsList(assembler.LocationsToStrings(service.GetAllLocations()))
 	default:
 		fmt.Println("Invalid command")
 		nearestCommand := util.FindNearestCommand(args[0], []string{"list"})

@@ -2,7 +2,9 @@ package util
 
 import (
 	"context"
+	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/hContainers/hContainers/global"
 
@@ -53,8 +55,37 @@ func CheckIfRunnerNameIsValid(runnerName string) bool {
 	return regexp.MustCompile(`^[A-Za-z0-9-.]*$`).MatchString(runnerName)
 }
 
-func GetAmountOfRunners() int {
-	servers, _, err := global.Client.Server.List(context.Background(), hcloud.ServerListOpts{ListOpts: hcloud.ListOpts{LabelSelector: "runner"}})
-	CheckError(err, "Failed to get servers", -1)
-	return len(servers)
+func WaitForServerToBeOnline(serverName string) error {
+	status := hcloud.ServerStatusUnknown // Waiting for server to be down :D
+	sshPossible := false
+	ip := GetIpByName(serverName)
+	for i := 0; i < 120; i++ {
+		if status == hcloud.ServerStatusRunning {
+			// Wait until ssh connection is possible
+			if CheckIfSshConnectionIsPossible(ip) {
+				sshPossible = true
+				break
+			}
+		}
+		fmt.Printf("Waiting for server %s to be online...\n", serverName)
+		time.Sleep(5 * time.Second)
+		status = GetServerByName(serverName).Status
+	}
+	if sshPossible {
+		return nil
+	} else {
+		return fmt.Errorf("server %s is not online", serverName)
+	}
+}
+
+func CheckIfSshConnectionIsPossible(serverIP string) bool {
+	stdout, err := RemoteRun(serverIP, "echo 'SSH connection is possible!'", 0)
+	if err != nil {
+		return false
+	}
+	if stdout == "SSH connection is possible!\n" {
+		return true
+	}
+	fmt.Println(stdout)
+	return false
 }

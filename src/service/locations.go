@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hContainers/hContainers/global"
 	"github.com/hContainers/hContainers/util"
@@ -10,18 +9,8 @@ import (
 	"github.com/hetznercloud/hcloud-go/hcloud"
 )
 
-func LocationList() {
-	locations := getAllLocations()
-	fmt.Println("Available locations:")
-	for _, location := range locations {
-		if location.Name != "ash" {
-			fmt.Printf("- %s\n", location.City)
-		}
-	}
-}
-
 func getLocationByName(locationName string) *hcloud.Location {
-	locations := getAllLocations()
+	locations := GetAllLocations()
 
 	for _, location := range locations {
 		if location.City == locationName {
@@ -31,7 +20,7 @@ func getLocationByName(locationName string) *hcloud.Location {
 	return nil
 }
 
-func getAllLocations() []*hcloud.Location {
+func GetAllLocations() []*hcloud.Location {
 	locations, err := global.Client.Location.All(context.Background())
 	util.CheckError(err, "Failed to get locations", -1)
 	return locations

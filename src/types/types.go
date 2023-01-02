@@ -21,6 +21,7 @@ func (c Container) GetPort() string {
 
 type ContainerInstances struct {
 	Image   string
+	Runner  string
 	Version string
 	Count   int
 	Healthy int

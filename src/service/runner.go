@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/hContainers/hContainers/global"
@@ -18,24 +19,24 @@ import (
 var cloudinit string
 
 func RunnerRestart(name string) {
-	fmt.Println("Restarting runner...")
 	_, _, err := global.Client.Server.Reboot(context.Background(), util.GetServerByName(name))
 	util.CheckError(err, "Failed to restart runner", 1)
-	fmt.Println("Runner restarted")
+	// Wait for server to be online
+	err = util.WaitForServerToBeOnline(name)
+	util.CheckError(err, "Failed to wait for runner to be online", 1)
 }
 
 func RunnerDelete(name string) {
-	fmt.Println("Deleting runner...")
 	_, _, err := global.Client.Server.DeleteWithResult(context.Background(), util.GetServerByName(name))
 	util.CheckError(err, "Failed to delete runner", 1)
-	fmt.Println("Runner deleted")
 }
 
 func RunnerCreate(name string, flags types.FlagsServer) {
-	fmt.Println("Creating runner...")
+	if util.CheckIfServerExists(name) {
+		fmt.Println("Runner already exists")
+		os.Exit(1)
+	}
 	location := getLocationByName(flags.Location)
-	fmt.Println("Location:", location.Name)
-	fmt.Println("Description:", location.Description)
 	create_options := hcloud.ServerCreateOpts{
 		Name:       name,
 		ServerType: &hcloud.ServerType{Name: flags.Sku},
@@ -47,5 +48,4 @@ func RunnerCreate(name string, flags types.FlagsServer) {
 	}
 	_, _, err := global.Client.Server.Create(context.Background(), create_options)
 	util.CheckError(err, "Failed to create runner", 1)
-	fmt.Println("Runner created")
 }

@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 # Clean Directory -------------------------------------------------------------
 clean:
 	@echo "Cleaning..."

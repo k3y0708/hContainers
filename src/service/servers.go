@@ -15,6 +15,14 @@ func GetAllServers() []*hcloud.Server {
 	return servers
 }
 
+func GetAllServerNames() []string {
+	var serverNames []string
+	for _, server := range GetAllServers() {
+		serverNames = append(serverNames, server.Name)
+	}
+	return serverNames
+}
+
 func checkIfServerExists(serverName string) bool {
 	servers := GetAllServers()
 

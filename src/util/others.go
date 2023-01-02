@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/hContainers/hContainers/colors"
+	"github.com/hContainers/hContainers/global"
+	"github.com/hetznercloud/hcloud-go/hcloud"
 )
 
 func CheckError(err error, message string, exitCode int) {
@@ -43,34 +45,6 @@ func Copy(src string, dst string) {
 	CheckError(err, "Failed to write file", 1)
 }
 
-/**
- * Returns an int representing how different two strings are
- * The lower the number, the more similar the strings are
- */
-func StringSimilarity(a, b string) int {
-	if len(a) == 0 {
-		return len(b)
-	}
-	if len(b) == 0 {
-		return len(a)
-	}
-
-	var cost int
-	if a[len(a)-1] == b[len(b)-1] {
-		cost = 0
-	} else {
-		cost = 1
-	}
-
-	res := min(
-		StringSimilarity(a[:len(a)-1], b)+1,
-		StringSimilarity(a, b[:len(b)-1])+1,
-		StringSimilarity(a[:len(a)-1], b[:len(b)-1])+cost,
-	)
-
-	return res
-}
-
 func min(a, b, c int) int {
 	if a < b && a < c {
 		return a
@@ -86,7 +60,7 @@ func FindNearestCommand(command string, possibleCommands []string) string {
 	nearestCommandDistance := 4
 
 	for _, possibleCommand := range possibleCommands {
-		distance := StringSimilarity(command, possibleCommand)
+		distance := stringSimilarity(command, possibleCommand)
 		if distance < nearestCommandDistance {
 			nearestCommand = possibleCommand
 			nearestCommandDistance = distance
@@ -94,4 +68,26 @@ func FindNearestCommand(command string, possibleCommands []string) string {
 	}
 
 	return nearestCommand
+}
+
+func GetEnv() {
+	hcloudToken, present := os.LookupEnv(global.ENV_HETZNER_TOKEN)
+	if !present {
+		fmt.Println(global.ENV_HETZNER_TOKEN + " not set")
+		os.Exit(1)
+	}
+	global.Client = hcloud.NewClient(hcloud.WithToken(hcloudToken))
+
+	sshKeyPath, present := os.LookupEnv(global.ENV_SSH_KEY_PATH)
+	if !present {
+		fmt.Println(global.ENV_SSH_KEY_PATH + " not set")
+		os.Exit(1)
+	}
+	sshKeyPath = strings.Replace(sshKeyPath, "~", os.Getenv("HOME"), 1)
+	publicKeyBytes, err := os.ReadFile(sshKeyPath + ".pub")
+	CheckError(err, "Failed to read public key", 1)
+	global.PublicKey = string(publicKeyBytes)
+	privateKeyBytes, err := os.ReadFile(sshKeyPath)
+	CheckError(err, "Failed to read private key", 1)
+	global.PrivateKey = string(privateKeyBytes)
 }

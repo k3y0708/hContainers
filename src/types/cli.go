@@ -5,3 +5,8 @@ type FlagsServer struct {
 	Location    string `long:"location" description:"Server location" default:"Falkenstein" choice:"Falkenstein" choice:"Nuremberg" choice:"Helsinki"`
 	DisableIPv6 bool   `long:"disable-ipv6" description:"Disable IPv6"`
 }
+
+type HelpRow struct {
+	Command     string
+	Description string
+}

@@ -1,21 +1,14 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-The format is the following:
 
-    # Unreleased
-    ## Added
-    ## Changed
-    ## Deprecated
-    ## Removed
-    ## Fixed
-    ## Security
+# v0.1.3
 
-    # 0.1.0
-    ## Added
-    - Initial release
+## Fixed
 
-# 0.1.0
+- Fix Release process
+
+# v0.1.0
 
 ## Added
 

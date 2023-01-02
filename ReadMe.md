@@ -55,6 +55,23 @@ The base of hContainers are runners. This are vms which get managed by hContaine
 
 _More follows_
 
+# Changelog
+
+All notable changes to this project will be documented in the [CHANGELOG.md](CHANGELOG.md) file.
+The format is the following:
+
+    # Unreleased
+    ## Added
+    ## Changed
+    ## Deprecated
+    ## Removed
+    ## Fixed
+    ## Security
+
+    # v0.1.0
+    ## Added
+    - help command
+
 # Tools used by hContainers
 
 - [Hetzner Cloud API](https://docs.hetzner.cloud/)

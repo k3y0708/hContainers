@@ -24,6 +24,15 @@ func RunnerRestart(name string) {
 	// Wait for server to be online
 	err = util.WaitForServerToBeOnline(name)
 	util.CheckError(err, "Failed to wait for runner to be online", 1)
+	fmt.Println("Restarting all containers on runner")
+	runnerStartAllContainers(name)
+}
+
+func runnerStartAllContainers(runnerName string) {
+	containers := getContainersFromRunner(util.GetServerByName(runnerName))
+	for _, container := range containers {
+		ContainerStart(container.Name)
+	}
 }
 
 func RunnerDelete(name string) {

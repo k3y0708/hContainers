@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"net"
+	"time"
 
 	"github.com/hContainers/hContainers/global"
 
@@ -46,11 +47,18 @@ func remoteRunWithoutRetry(addr string, cmd string) (string, error) {
 func RemoteRun(addr string, cmd string, retry int) (string, error) {
 	var err error
 	var output string
+	broken := false
 	for i := 0; i <= retry; i++ {
 		output, err = remoteRunWithoutRetry(addr, cmd)
 		if err == nil {
+			broken = true
 			break
 		}
+		time.Sleep(5 * time.Second)
 	}
-	return output, err
+	if !broken {
+		return output, err
+	} else {
+		return output, nil
+	}
 }
